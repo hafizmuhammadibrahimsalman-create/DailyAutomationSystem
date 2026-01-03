@@ -1,0 +1,9 @@
+python-dotenv
+requests
+beautifulsoup4
+feedparser
+google-generativeai
+edge-tts
+moviepy
+pillow
+keyring

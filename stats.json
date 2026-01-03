@@ -1,0 +1,38 @@
+{
+  "total_runs": 5,
+  "total_errors": 1,
+  "api_calls": 0,
+  "last_run": "2025-12-23T14:32:53.645818",
+  "history": [
+    {
+      "timestamp": "2025-12-23T14:32:53.645818",
+      "duration": 28.76,
+      "success": true,
+      "articles": 40
+    },
+    {
+      "timestamp": "2025-12-23T14:27:58.748586",
+      "duration": 49.87,
+      "success": true,
+      "articles": 40
+    },
+    {
+      "timestamp": "2025-12-23T02:15:11.463192",
+      "duration": 50.04,
+      "success": true,
+      "articles": 40
+    },
+    {
+      "timestamp": "2025-12-23T01:22:01.709559",
+      "duration": 0.31,
+      "success": true,
+      "articles": 40
+    },
+    {
+      "timestamp": "2025-12-23T01:20:37.248260",
+      "duration": 0.27,
+      "success": false,
+      "articles": 0
+    }
+  ]
+}
