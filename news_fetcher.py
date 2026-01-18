@@ -5,6 +5,7 @@ from typing import List, Dict
 from config import TOPICS, MAX_ARTICLES_PER_TOPIC, CACHE_DIR
 from secure_config import SecureConfig
 from smart_cache import SmartCache
+from circuit_breaker import circuit
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +30,13 @@ class NewsFetcher:
 
         arts = []
         if self.news_api and "YOUR_NEWSAPI" not in self.news_api:
-            arts.extend(self._fetch_newsapi(cfg['keywords']))
+            try:
+                arts.extend(self._fetch_newsapi(cfg['keywords']))
+            except Exception: pass
         if self.gnews_api and "YOUR_GNEWS" not in self.gnews_api:
-            arts.extend(self._fetch_gnews(cfg['keywords']))
+            try:
+                arts.extend(self._fetch_gnews(cfg['keywords']))
+            except Exception: pass
             
         arts.extend(self._fetch_google_rss(cfg['keywords']))
         if tid in ["pakistan", "ijt"]: arts.extend(self._fetch_pak_rss(cfg))
@@ -40,6 +45,7 @@ class NewsFetcher:
         if unique: self.cache.set(key, unique)
         return unique
 
+    @circuit("newsapi", threshold=3, timeout=300)
     def _fetch_newsapi(self, kws: List[str]) -> List[Dict]:
         try:
             url = "https://newsapi.org/v2/everything"
@@ -50,6 +56,7 @@ class NewsFetcher:
         except Exception as e: logger.warn(f"NewsAPI: {e}")
         return []
 
+    @circuit("gnews", threshold=3, timeout=300)
     def _fetch_gnews(self, kws: List[str]) -> List[Dict]:
         try:
             url = "https://gnews.io/api/v4/search"

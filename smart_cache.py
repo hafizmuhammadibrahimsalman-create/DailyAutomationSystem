@@ -4,11 +4,17 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional, Any
 import sys
+import os
 
 # Force UTF-8 encoding for Windows console
-if sys.platform == 'win32':
-    sys.stdout.reconfigure(encoding='utf-8')
-    sys.stderr.reconfigure(encoding='utf-8')
+try:
+    from console_utils import setup_console
+    setup_console()
+except ImportError:
+    if sys.platform == 'win32':
+        os.system('chcp 65001 > nul 2>&1')
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 class SmartCache:
     """Intelligent caching to reduce API calls"""
@@ -29,11 +35,11 @@ class SmartCache:
             cached_time = datetime.fromisoformat(data['timestamp'])
             
             if datetime.now() - cached_time < timedelta(minutes=max_age_minutes):
-                print(f"⚡ Cache Hit: {key[:20]}...")
+                print(f"[CACHE] Cache Hit: {key[:20]}...")
                 return data['content']
             
         except Exception as e:
-            print(f"⚠️ Cache read error: {e}")
+            print(f"[WARN] Cache read error: {e}")
             
         return None
     
@@ -46,7 +52,7 @@ class SmartCache:
                 'content': content
             }, ensure_ascii=False, indent=2), encoding='utf-8')
         except Exception as e:
-            print(f"⚠️ Cache write error: {e}")
+            print(f"[WARN] Cache write error: {e}")
     
     def _hash(self, key: str) -> str:
         return hashlib.md5(key.encode()).hexdigest()

@@ -1,39 +1,87 @@
-# DailyNewsBot V2.0 - Sovereign Automation Stack
+# DailyNewsBot
 
-An automated, AI-powered system that gathers daily news, summarizes it using Gemini 1.5 Pro, and creates a video briefing. Designed for "Sovereign Automation" using n8n and Google Antigravity.
+An intelligent, automated news aggregation and delivery system that fetches news from multiple sources, summarizes them using Google Gemini AI, and delivers personalized reports via WhatsApp.
 
 ## Features
--   **Multi-Source Fetching**: NewsAPI, GNews, Google News RSS, and local scraping.
--   **AI Analysis**: Gemini 1.5 Pro filters for importance and generates "Intelligence Reports".
--   **Rich Media**: Automatically generates a `daily_briefing.mp4` video with voiceover.
--   **Sovereign Control**: Orchestrated by n8n (locally hosted) via MCP.
--   **Mobile Trigger**: Run from your phone via n8n Webhook.
 
-## Quick Start (The "Instant" Method)
+- **Multi-Source News Fetching**: Google News RSS, NewsAPI, GNews
+- **AI-Powered Summarization**: Uses Google Gemini for intelligent filtering and summarization
+- **Smart Deduplication**: Removes duplicate articles across sources
+- **WhatsApp Delivery**: Automated message delivery using pywhatkit
+- **Resilient Architecture**: Circuit breaker pattern for API failure handling
+- **Visual Dashboard**: HTML analytics dashboard with Chart.js
+- **Caching**: Smart caching to reduce API calls
+- **Video Briefings**: Optional video generation with text-to-speech
 
-1.  **Start the Engine**
-    Double-click `START_BOT.bat`. 
-    *   This will automatically download and start n8n.
-    *   It will display a **Tunnel URL** (e.g., `https://xxxx.hooks.n8n.cloud`).
+## Quick Start
 
-2.  **Connect the Brain (One-time Setup)**
-    *   Open `http://localhost:5678` in your browser.
-    *   Get your API Key (Settings -> Public API).
-    *   Run `python setup_mcp.py` and paste the key.
-    *   Import `n8n_workflow.json` into n8n.
+### 1. Clone & Install
 
-3.  **Run It**
-    *   Click the Webhook URL (from your phone or browser).
-    *   Receive your Video Briefing via Email!
+```bash
+git clone https://github.com/YOUR_USERNAME/DailyNewsBot.git
+cd DailyNewsBot
+pip install -r requirements.txt
+```
 
-## File Structure
-*   `START_BOT.bat`: The main launcher.
-*   `bot_core.py`: Core Python logic.
-*   `video_generator.py`: Creates the video content.
-*   `n8n_workflow.json`: The automation logic for n8n.
-*   `.env`: Configuration secrets.
+### 2. Configure
 
-## Requirements
-*   Python 3.10+
-*   Node.js (for n8n)
-*   Google One AI Premium (for Gemini usage)
+Create a `.env` file:
+
+```env
+WHATSAPP_NUMBER=+923001234567
+GEMINI_API_KEY=your_gemini_api_key
+NEWS_API_KEY=your_newsapi_key  # Optional
+GNEWS_API_KEY=your_gnews_key   # Optional
+```
+
+### 3. Run
+
+```bash
+# Health check
+python run_automation.py --health
+
+# Dry run (test without sending)
+python run_automation.py --dry-run
+
+# Full run (live WhatsApp delivery)
+python run_automation.py --run
+
+# Generate dashboard only
+python run_automation.py --dashboard
+```
+
+## Project Structure
+
+```
+DailyNewsBot/
+├── run_automation.py      # Main controller
+├── config.py              # Configuration & topics
+├── news_fetcher.py        # News source integration
+├── ai_summarizer.py       # Gemini AI integration
+├── whatsapp_sender.py     # WhatsApp delivery
+├── circuit_breaker.py     # Resilience pattern
+├── news_clustering.py     # Deduplication
+├── smart_cache.py         # Caching layer
+├── dashboard_generator.py # Analytics dashboard
+├── video_generator.py     # Video briefing (optional)
+├── analytics.py           # Usage tracking
+├── secure_config.py       # Credential management
+├── console_utils.py       # Console encoding fixes
+└── content_scraper.py     # Full article extraction
+```
+
+## API Keys
+
+| Service | Required | Get Key |
+|---------|----------|---------|
+| Google Gemini | Yes | [AI Studio](https://aistudio.google.com/app/apikey) |
+| NewsAPI | No | [newsapi.org](https://newsapi.org) |
+| GNews | No | [gnews.io](https://gnews.io) |
+
+## License
+
+MIT License - See LICENSE file for details.
+
+## Author
+
+Muhammad Ibrahim Salman

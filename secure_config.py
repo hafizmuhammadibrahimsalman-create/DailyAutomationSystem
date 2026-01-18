@@ -21,11 +21,11 @@ class SecureConfig:
         if keyring:
             try:
                 keyring.set_password(SecureConfig.SERVICE_NAME, key, value)
-                print(f"🔒 Securely stored {key}")
+                print(f"[OK] Securely stored {key}")
             except Exception as e:
-                print(f"⚠️ Keyring error: {e}. Fallback to .env recommended.")
+                print(f"[WARN] Keyring error: {e}. Fallback to .env recommended.")
         else:
-            print("⚠️ 'keyring' module not installed. Cannot store securely.")
+            print("[WARN] 'keyring' module not installed. Cannot store securely.")
 
     @staticmethod
     def get_credential(key: str) -> str:

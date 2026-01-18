@@ -30,50 +30,50 @@ GNEWS_API_KEY = os.getenv("GNEWS_API_KEY", "YOUR_GNEWS_KEY_HERE")
 
 TOPICS = {
     "ai": {
-        "name": "🤖 AI & Machine Learning",
+        "name": "AI & Machine Learning",
         "keywords": ["artificial intelligence", "machine learning", "ChatGPT", "Gemini", "OpenAI", "deep learning", "LLM", "neural network"],
         "priority": "HIGH",
         "include_all": True  # You want ALL AI news
     },
     "technology": {
-        "name": "💻 Technology",
+        "name": "Technology",
         "keywords": ["technology", "tech news", "software", "startup", "innovation", "free tools", "productivity"],
         "priority": "HIGH",
         "filter": "beneficial"  # Only beneficial tech news
     },
     "pakistan": {
-        "name": "🇵🇰 Pakistan News",
+        "name": "Pakistan News",
         "keywords": ["Islamabad", "Taxila", "Karachi", "Pakistan", "Rawalpindi", "Punjab"],
         "priority": "HIGH",
         "cities": ["Islamabad", "Taxila", "Karachi", "Rawalpindi"],
         "filter": "important"  # Skip time-wasting news
     },
     "politics": {
-        "name": "🏛️ Politics",
+        "name": "Politics",
         "keywords": ["Pakistan politics", "government", "election", "PTI", "PML-N", "PPP", "Parliament"],
         "priority": "MEDIUM",
         "format": "infographic"  # Generate infographics
     },
     "business": {
-        "name": "💼 Business",
+        "name": "Business",
         "keywords": ["business", "economy", "stock market", "investment", "PSX", "rupee", "startup funding"],
         "priority": "MEDIUM",
         "filter": "attention_worthy"  # Only important business news
     },
     "sports": {
-        "name": "⚽ Sports",
+        "name": "Sports",
         "keywords": ["Pakistan cricket", "PSL", "sports Pakistan", "Babar Azam", "hockey Pakistan"],
         "priority": "LOW",
         "filter": "very_valuable"  # Only very valuable sports news
     },
     "science": {
-        "name": "🔬 Science",
+        "name": "Science",
         "keywords": ["science breakthrough", "research", "space", "health", "medicine", "discovery"],
         "priority": "MEDIUM",
         "filter": "beneficial"  # Only beneficial science
     },
     "ijt": {
-        "name": "📚 Islami Jamiat Talaba",
+        "name": "Islami Jamiat Talaba",
         "keywords": ["Islami Jamiat Talaba", "IJT", "student union", "JI students"],
         "priority": "HIGH",
         "filter": "attention_required"

@@ -45,7 +45,7 @@ class Analytics:
         try:
             Path(STATS_FILE).write_text(json.dumps(stats, indent=2))
         except Exception as e:
-            print(f"⚠️ Failed to save analytics: {e}")
+            print(f"[WARN] Failed to save analytics: {e}")
 
     @staticmethod
     def log_api_call(service: str):

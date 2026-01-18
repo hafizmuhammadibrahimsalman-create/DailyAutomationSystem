@@ -1,4 +1,4 @@
-gi# Daily News Intelligence System - Gemini AI Summarizer
+# Daily News Intelligence System - Gemini AI Summarizer
 # Uses Google Gemini API (Google One Pro) for intelligent summarization
 
 import google.generativeai as genai
@@ -6,6 +6,7 @@ from typing import List, Dict, Optional
 import json
 import logging
 from config import GEMINI_API_KEY, GEMINI_MODEL, GEMINI_FLASH, SUMMARIZER_PROMPT, INFOGRAPHIC_PROMPT, TOPICS
+from content_scraper import ContentScraper
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,15 +16,17 @@ class GeminiSummarizer:
     """AI-powered news summarizer using Google Gemini."""
     
     def __init__(self):
+        self.scraper = ContentScraper()
+        
         if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_GEMINI_API_KEY_HERE":
             genai.configure(api_key=GEMINI_API_KEY)
             self.model = genai.GenerativeModel(GEMINI_MODEL)
             self.flash_model = genai.GenerativeModel(GEMINI_FLASH)
             self.enabled = True
-            logger.info("✅ Gemini AI initialized successfully")
+            logger.info("[OK] Gemini AI initialized successfully")
         else:
             self.enabled = False
-            logger.warning("⚠️ Gemini API key not configured. Using basic summaries.")
+            logger.warning("[WARN] Gemini API key not configured. Using basic summaries.")
     
     def create_intelligence_report(self, all_news: Dict[str, List[Dict]]) -> str:
         """Create a comprehensive intelligence report from all news."""
@@ -32,12 +35,33 @@ class GeminiSummarizer:
             return self._create_basic_report(all_news)
         
         try:
+            # 1. Scrape full content for filtered articles
+            logger.info("[AI] Reading full articles for deep analysis...")
+            urls_to_scrape = []
+            for articles in all_news.values():
+                for article in articles:
+                    if article.get('url'):
+                        urls_to_scrape.append(article['url'])
+            
+            # Parallel fetch
+            scraped_content = self.scraper.fetch_parallel(urls_to_scrape)
+            
+            # Enhance articles with full text
+            enhanced_news = all_news.copy()
+            for topic in enhanced_news:
+                for article in enhanced_news[topic]:
+                    url = article.get('url')
+                    if url and scraped_content.get(url):
+                        article['full_content'] = scraped_content[url]
+                    else:
+                        article['full_content'] = article.get('description', '')
+
             # Prepare news data for AI
-            news_json = json.dumps(all_news, indent=2, default=str)
+            news_json = json.dumps(enhanced_news, indent=2, default=str)
             
             prompt = f"""{SUMMARIZER_PROMPT}
 
-Today's collected news articles:
+Today's collected news (Full content analysis):
 {news_json}
 
 Create a comprehensive but CONCISE daily intelligence report. Format for WhatsApp:
@@ -45,19 +69,20 @@ Create a comprehensive but CONCISE daily intelligence report. Format for WhatsAp
 1. Start with a greeting and today's date
 2. For each topic category:
    - Use the topic emoji and name as header
-   - List 2-3 most important items only
+   - Synthesize the FULL CONTENT into 2-3 deep insights (not just headlines)
    - Use bullet points (•)
-   - Include action items if any
+   - Highlight specific numbers, quotes, or implications found in the text
    - Note: For Politics, create a brief infographic-style summary
 
 3. End with:
-   - 🎯 Key Takeaways (2-3 actionable insights)
-   - 📊 Quick Stats (if relevant numbers)
+   - [KEY] Key Takeaways (2-3 actionable insights)
+   - [STATS] Quick Stats (if relevant numbers)
 
 IMPORTANT: 
+- Use the FULL CONTENT provided to give depth
 - Be EXTREMELY selective - only truly important news
 - Skip fluff, entertainment, and time-wasters
-- Maximum 2000 characters total
+- Maximum 2500 characters total
 - Make it scannable on mobile"""
 
             response = self.model.generate_content(prompt)
@@ -147,9 +172,25 @@ Maximum 3 selections. Be VERY selective."""
         """Create a basic report without AI (fallback)."""
         from datetime import datetime
         
+        def sanitize(text):
+            """Clean up encoding issues in text."""
+            if not text:
+                return text
+            # Fix common mojibake patterns
+            fixes = {
+                'â€™': "'", 'â€˜': "'", 'â€œ': '"', 'â€': '"',
+                'â€"': '-', 'â€"': '-', 'â€¦': '...', 'Â': '',
+                '\u2018': "'", '\u2019': "'", '\u201c': '"', '\u201d': '"',
+                '\u2013': '-', '\u2014': '-', '\u2026': '...',
+            }
+            for bad, good in fixes.items():
+                text = text.replace(bad, good)
+            # Remove any remaining non-ASCII
+            return text.encode('ascii', errors='ignore').decode('ascii')
+        
         lines = [
-            f"📰 *Daily News Report*",
-            f"📅 {datetime.now().strftime('%B %d, %Y')}",
+            f"[NEWS] *Daily News Report*",
+            f"[DATE] {datetime.now().strftime('%B %d, %Y')}",
             ""
         ]
         
@@ -160,11 +201,11 @@ Maximum 3 selections. Be VERY selective."""
             topic_config = TOPICS.get(topic_id, {})
             topic_name = topic_config.get('name', topic_id.title())
             
-            lines.append(f"\n*{topic_name}*")
+            lines.append(f"\n*{sanitize(topic_name)}*")
             
             for article in articles[:3]:
-                title = article['title'][:80]
-                lines.append(f"• {title}")
+                title = sanitize(article['title'][:80])
+                lines.append(f"* {title}")
         
         lines.append("\n---")
         lines.append("_Powered by Daily News Intelligence_")
@@ -187,6 +228,6 @@ if __name__ == "__main__":
         ]
     }
     
-    print("🤖 Testing Gemini Summarizer...")
+    print("[TEST] Testing Gemini Summarizer...")
     report = summarizer.create_intelligence_report(sample_news)
     print("\n" + report)

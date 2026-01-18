@@ -21,18 +21,41 @@ class WhatsAppSender:
         webbrowser.open("https://web.whatsapp.com")
     
     def send_message(self, message: str, phone_number: str = None) -> bool:
-        """Send message using PyWhatKit instant (best effort)."""
+        """Send message using PyWhatKit with improved reliability."""
         target = phone_number or self.phone_number
         if not target.startswith("+"): target = f"+{target}"
         
         try:
-            logger.info(f"📱 Sending to {target}...")
-            # wait_time=20 allows Web to load, close_time=3 closes tab after send
-            kit.sendwhatmsg_instantly(target, message, wait_time=20, tab_close=True, close_time=3)
-            logger.info("✅ Send command issued.")
+            logger.info(f"[>>] Sending to {target}...")
+            
+            # Method 1: Use sendwhatmsg_instantly with longer wait
+            # wait_time=30 gives WhatsApp Web more time to load
+            # tab_close=False keeps tab open so we can verify
+            kit.sendwhatmsg_instantly(
+                target, 
+                message, 
+                wait_time=30,      # Wait 30 seconds for WhatsApp to load
+                tab_close=False,   # Don't close - user can verify
+                close_time=5
+            )
+            
+            # Press Enter using pyautogui for extra reliability
+            try:
+                import pyautogui
+                time.sleep(2)  # Wait for message to be typed
+                pyautogui.press('enter')
+                logger.info("[OK] Enter pressed to send message.")
+            except ImportError:
+                logger.info("[INFO] pyautogui not installed - message may need manual Enter press")
+            except Exception as e:
+                logger.warning(f"[WARN] Auto-send failed: {e}")
+            
+            time.sleep(3)  # Wait for send to complete
+            logger.info("[OK] Send command issued. Check WhatsApp Web to verify.")
             return True
+            
         except Exception as e:
-            logger.error(f"❌ Send failed: {e}")
+            logger.error(f"[ERR] Send failed: {e}")
             return False
     
     def send_long_message(self, message: str, phone_number: str = None) -> bool:
@@ -43,4 +66,5 @@ if __name__ == "__main__":
     print(f"Target: {sender.phone_number}")
     opt = input("1: Login, 2: Test Send\n> ")
     if opt == "1": sender.login_whatsapp()
-    elif opt == "2": sender.send_message("Test Message")
+    elif opt == "2": sender.send_message("Test Message from DailyNewsBot")
+
